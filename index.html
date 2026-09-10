@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Thay Đồ - Mẫu Có Sẵn</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f2f2f7; color: #1c1c1e; padding: 12px; text-align: center; }
+        
+        header { margin-bottom: 12px; }
+        h1 { font-size: 20px; font-weight: 700; color: #000; }
+        p { font-size: 13px; color: #8e8e93; margin-top: 4px; }
+
+        .card { background: #ffffff; border-radius: 14px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 12px; }
+        
+        .guide { background: #e5f1ff; color: #007aff; text-align: left; font-size: 12px; line-height: 1.5; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+        .guide ol { margin-left: 18px; }
+
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 780px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e5e5ea;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+        
+        footer { font-size: 11px; color: #aeaeb2; margin-top: 15px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>👗 App AI Thay Đồ Bán Hàng</h1>
+        <p>Chọn mẫu có sẵn & Tải đồ từ iPhone của bạn</p>
+    </header>
+
+    <div class="card">
+        <div class="guide">
+            <b>📌 Hướng dẫn thao tác nhanh:</b>
+            <ol>
+                <li><b>Chọn Người Mẫu:</b> Ô bên trái đã có sẵn danh sách các người mẫu mẫu (hoặc bạn có thể tự tải mẫu riêng). Nhấn vào các mẫu gợi ý bên dưới ô để chọn.</li>
+                <li><b>Tải Ảnh Quần/Áo:</b> Nhấn vào ô bên phải <i>(Garment Image)</i> $\rightarrow$ Chọn <b>Thư viện ảnh</b> để tải ảnh sản phẩm trên iPhone của bạn lên.</li>
+                <li><b>Bấm Bắt Đầu:</b> Bấm nút <b>Try-on</b> và đợi 10 - 15 giây để lấy ảnh hoàn chỉnh!</li>
+            </ol>
+        </div>
+
+        <div class="iframe-container">
+            <!-- Sử dụng giao diện IDM-VTON hỗ trợ sẵn Thư viện người mẫu và tải ảnh quần áo từ điện thoại -->
+            <iframe src="https://yisol-idm-vton.hf.space" allow="camera"></iframe>
+        </div>
+    </div>
+
+    <footer>
+        &copy; Ứng dụng hỗ trợ chụp ảnh sản phẩm thời trang tự động trên iOS
+    </footer>
+
+</body>
+</html>
