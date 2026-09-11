@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapCut AI - Edit & Virtual Try-On</title>
+    <style>
+        :root {
+            --bg-dark: #121214;
+            --panel-bg: #1e1e22;
+            --accent-color: #00f2fe;
+            --text-main: #ffffff;
+            --text-sub: #a1a1aa;
+            --border-color: #2e2e35;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header CapCut */
+        header {
+            height: 50px;
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        header .logo {
+            font-weight: bold;
+            font-size: 18px;
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-export {
+            background: linear-gradient(45deg, #00f2fe, #00c6ff);
+            color: #000;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Layout chính */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 50px);
+        }
+
+        /* Sidebar công cụ bên trái */
+        .sidebar {
+            width: 340px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .upload-card {
+            background: #282830;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .upload-card span {
+            font-size: 13px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .upload-card label {
+            display: inline-block;
+            color: var(--accent-color);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .upload-card input[type="file"] {
+            display: none;
+        }
+
+        .preview-thumb {
+            width: 100%;
+            max-height: 90px;
+            object-fit: contain;
+            border-radius: 6px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* Bộ lọc chỉnh ảnh */
+        .filter-group {
+            margin-bottom: 12px;
+        }
+
+        .filter-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: var(--text-sub);
+        }
+
+        .filter-group input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-color);
+        }
+
+        /* Khu vực hiển thị kết quả (Editor Workspace) */
+        .editor-workspace {
+            flex: 1;
+            background-color: #0a0a0c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .canvas-container {
+            max-width: 100%;
+            max-height: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #18181b;
+        }
+
+        #main-canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 80vh;
+        }
+
+        .btn-action {
+            width: 100%;
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column-reverse;
+            }
+            .sidebar {
+                width: 100%;
+                height: 55%;
+            }
+            .editor-workspace {
+                height: 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">CapCut AI Editor</div>
+        <button class="btn-export" onclick="downloadImage()">Xuất Ảnh</button>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar điều khiển -->
+        <div class="sidebar">
+            <div class="section-title">1. Thay Đồ AI (Cả Áo & Quần)</div>
+            
+            <div class="upload-card">
+                <span>📷 Ảnh Người Mẫu</span>
+                <label for="person-file">Tải ảnh lên</label>
+                <input type="file" id="person-file" accept="image/*" onchange="loadPersonImage(event)">
+                <img id="person-thumb" class="preview-thumb">
+            </div>
+
+            <div class="upload-card">
+                <span>👕 Ảnh Áo Mới</span>
+                <label for="top-file">Tải ảnh áo</label>
+                <input type="file" id="top-file" accept="image/*" onchange="loadTopImage(event)">
+                <img id="top-thumb" class="preview-thumb">
+            </div>
+
+            <div class="upload-card">
+                <span>👖 Ảnh Quần Mới</span>
+                <label for="bottom-file">Tải ảnh quần</label>
+                <input type="file" id="bottom-file" accept="image/*" onchange="loadBottomImage(event)">
+                <img id="bottom-thumb" class="preview-thumb">
+            </div>
+
+            <button class="btn-action" onclick="processAI()">✨ Ghép Đồ AI</button>
+
+            <hr style="border-color: var(--border-color); margin: 20px 0;">
+
+            <div class="section-title">2. Bộ Lọc Chỉnh Ảnh CapCut</div>
+
+            <div class="filter-group">
+                <label>Độ sáng (Brightness) <span id="val-bright">100%</span></label>
+                <input type="range" id="bright" min="50" max="150" value="100" oninput="applyFilters()">
+            </div>
+
+            <div class="filter-group">
+                <label>Tương phản (Contrast) <span id="val-contrast">100%</span></label>
+                <input type="range" id="contrast" min="50" max="150" value="100" oninput="applyFilters()">
+            </div>
+
+            <div class="filter-group">
+                <label>Bão hòa màu (Saturate) <span id="val-saturate">100%</span></label>
+                <input type="range" id="saturate" min="0" max="200" value="100" oninput="applyFilters()">
+            </div>
+        </div>
+
+        <!-- Khung làm việc chính -->
+        <div class="editor-workspace">
+            <div class="canvas-container">
+                <canvas id="main-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('main-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let imgPerson = new Image();
+        let imgTop = new Image();
+        let imgBottom = new Image();
+
+        // Khởi tạo khung canvas ban đầu
+        canvas.width = 400;
+        canvas.height = 500;
+        ctx.fillStyle = "#18181b";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#a1a1aa";
+        ctx.font = "14px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Tải ảnh người mẫu lên để bắt đầu", canvas.width / 2, canvas.height / 2);
+
+        // Nạp ảnh người
+        function loadPersonImage(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imgPerson.onload = function() {
+                    canvas.width = imgPerson.width;
+                    canvas.height = imgPerson.height;
+                    renderCanvas();
+                }
+                imgPerson.src = event.target.result;
+                document.getElementById('person-thumb').src = event.target.result;
+                document.getElementById('person-thumb').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // Nạp ảnh Áo
+        function loadTopImage(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imgTop.src = event.target.result;
+                document.getElementById('top-thumb').src = event.target.result;
+                document.getElementById('top-thumb').style.display = 'block';
+                renderCanvas();
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // Nạp ảnh Quần
+        function loadBottomImage(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imgBottom.src = event.target.result;
+                document.getElementById('bottom-thumb').src = event.target.result;
+                document.getElementById('bottom-thumb').style.display = 'block';
+                renderCanvas();
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // Áp dụng bộ lọc và vẽ lên Canvas
+        function renderCanvas() {
+            if (!imgPerson.src) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const bright = document.getElementById('bright').value;
+            const contrast = document.getElementById('contrast').value;
+            const saturate = document.getElementById('saturate').value;
+
+            ctx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${saturate}%)`;
+            ctx.drawImage(imgPerson, 0, 0);
+
+            // Mô phỏng vị trí đè áo và quần lên người mẫu
+            if (imgTop.src) {
+                ctx.drawImage(imgTop, canvas.width * 0.2, canvas.height * 0.22, canvas.width * 0.6, canvas.height * 0.38);
+            }
+            if (imgBottom.src) {
+                ctx.drawImage(imgBottom, canvas.width * 0.22, canvas.height * 0.55, canvas.width * 0.56, canvas.height * 0.42);
+            }
+        }
+
+        function applyFilters() {
+            document.getElementById('val-bright').innerText = document.getElementById('bright').value + '%';
+            document.getElementById('val-contrast').innerText = document.getElementById('contrast').value + '%';
+            document.getElementById('val-saturate').innerText = document.getElementById('saturate').value + '%';
+            renderCanvas();
+        }
+
+        // Xử lý gửi yêu cầu ghép AI
+        function processAI() {
+            if (!imgPerson.src) {
+                alert("Vui lòng tải ảnh người mẫu trước!");
+                return;
+            }
+            alert("Đã nhận yêu cầu! Hệ thống đang xử lý ghép cả Áo và Quần lên người mẫu...");
+        }
+
+        // Nút Xuất Ảnh về máy
+        function downloadImage() {
+            if (!imgPerson.src) {
+                alert("Chưa có ảnh để xuất!");
+                return;
+            }
+            const link = document.createElement('a');
+            link.download = 'capcut-ai-edit.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
